@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -61,11 +62,13 @@ public class FirstTest {
                 "Не удалось найти строку поиска",
                 10
         );
-        waitFindElementAndSendKeys(
-                By.xpath("//*[contains(@text, 'Search…')]"),
-                "Android",
-                "Не удалось найти поле ввода",
-                5);
+
+        WebElement element = waitFindElement(
+                By.id("org.wikipedia:id/search_src_text"),
+                "Не удалось найти поле ввода"
+        );
+        elementAttributeToBe(element, "text", "Search…");
+        element.sendKeys("Android");
         waitFindElementAndClear(
                 By.id("org.wikipedia:id/search_toolbar"),
                 "Не удалось очистить поле ввода",
@@ -111,6 +114,7 @@ public class FirstTest {
         );
     }
 
+
     private WebElement waitFindElement(By by, String errorMessage, long timeoutSeconds) {
         WebDriverWait webDriverWait = new WebDriverWait(androidDriver, timeoutSeconds);
         webDriverWait.withMessage(errorMessage + "\n");
@@ -141,6 +145,24 @@ public class FirstTest {
         return webDriverWait.until(
                 ExpectedConditions.invisibilityOfElementLocated(by)
         );
+    }
+
+    private boolean waitFindElementAttributeToBe(By by, String attribute, String value, String errorMessage, long timeoutSeconds) {
+        WebDriverWait webDriverWait = new WebDriverWait(androidDriver, timeoutSeconds);
+        webDriverWait.withMessage(errorMessage + "\n");
+        return webDriverWait.until(
+                ExpectedConditions.attributeToBe(by, attribute, value)
+        );
+    }
+
+    private boolean elementAttributeToBe(WebElement element, String attribute, String value) {
+        ExpectedCondition<Boolean> expectedCondition = ExpectedConditions.attributeToBe(element, attribute, value);
+        boolean actual = expectedCondition.apply(androidDriver);
+        Assert.assertEquals(
+                expectedCondition.toString(),
+                true,
+                actual);
+        return actual;
     }
 
     private WebElement waitFindElementAndClear(By by, String errorMessage, long timeoutSeconds) {
